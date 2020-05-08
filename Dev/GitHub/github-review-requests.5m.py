@@ -32,6 +32,8 @@ import datetime
 import json
 import os
 import sys
+import pprint
+pp = pprint.PrettyPrinter(indent=4)
 try:
     # For Python 3.x
     from urllib.request import Request, urlopen
@@ -63,6 +65,7 @@ query = '''{
               name
             }
           }
+          isDraft
         }
       }
     }
@@ -73,7 +76,7 @@ query = '''{
 colors = {
     'inactive': '#b4b4b4',
     'title': '#ffffff' if DARK_MODE else '#000000',
-    'subtitle': '#586069'}
+    'subtitle': 'green'}
 
 
 def execute_query(query):
@@ -100,6 +103,7 @@ def parse_date(text):
 
 
 def print_line(text, **kwargs):
+    text = text.replace(u'\xa0', u' ')
     params = ' '.join(['%s=%s' % (key, value) for key, value in kwargs.items()])
     print('%s | %s' % (text, params) if kwargs.items() else text)
 
@@ -117,13 +121,20 @@ if __name__ == '__main__':
     print_line('---')
 
     for pr in [r['node'] for r in response['edges']]:
+        
         labels = [l['name'] for l in pr['labels']['nodes']]
         title = '%s - %s' % (pr['repository']['nameWithOwner'], pr['title'])
-        title_color = colors.get('inactive' if WIP_LABEL in labels else 'title')
         subtitle = '#%s opened on %s by @%s' % (
             pr['number'], parse_date(pr['createdAt']), pr['author']['login'])
-        subtitle_color = colors.get('inactive' if WIP_LABEL in labels else 'subtitle')
-
+        if pr['isDraft']==True or WIP_LABEL in labels:
+            title = ':construction:  -- ' + title
+            title_color = colors.get('inactive')
+            subtitle_color = colors.get('inactive')
+        else:
+            title_color = colors.get('title')
+            subtitle_color = colors.get('subtitle')
+            
         print_line(title, size=16, color=title_color, href=pr['url'])
         print_line(subtitle, size=12, color=subtitle_color)
         print_line('---')
+        
