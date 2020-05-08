@@ -63,6 +63,7 @@ query = '''{
               name
             }
           }
+          isDraft
         }
       }
     }
@@ -73,7 +74,7 @@ query = '''{
 colors = {
     'inactive': '#b4b4b4',
     'title': '#ffffff' if DARK_MODE else '#000000',
-    'subtitle': '#586069'}
+    'subtitle': 'green'}
 
 
 def execute_query(query):
@@ -119,11 +120,16 @@ if __name__ == '__main__':
     for pr in [r['node'] for r in response['edges']]:
         labels = [l['name'] for l in pr['labels']['nodes']]
         title = '%s - %s' % (pr['repository']['nameWithOwner'], pr['title'])
-        title_color = colors.get('inactive' if WIP_LABEL in labels else 'title')
         subtitle = '#%s opened on %s by @%s' % (
             pr['number'], parse_date(pr['createdAt']), pr['author']['login'])
-        subtitle_color = colors.get('inactive' if WIP_LABEL in labels else 'subtitle')
-
+        if pr['isDraft']==True or WIP_LABEL in labels:
+            title = ':construction:  -- ' + title
+            title_color = colors.get('inactive')
+            subtitle_color = colors.get('inactive')
+        else:
+            title_color = colors.get('title')
+            subtitle_color = colors.get('subtitle')
+            
         print_line(title, size=16, color=title_color, href=pr['url'])
         print_line(subtitle, size=12, color=subtitle_color)
         print_line('---')
