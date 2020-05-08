@@ -32,8 +32,6 @@ import datetime
 import json
 import os
 import sys
-import pprint
-pp = pprint.PrettyPrinter(indent=4)
 try:
     # For Python 3.x
     from urllib.request import Request, urlopen
@@ -103,7 +101,6 @@ def parse_date(text):
 
 
 def print_line(text, **kwargs):
-    text = text.replace(u'\xa0', u' ')
     params = ' '.join(['%s=%s' % (key, value) for key, value in kwargs.items()])
     print('%s | %s' % (text, params) if kwargs.items() else text)
 
@@ -121,7 +118,6 @@ if __name__ == '__main__':
     print_line('---')
 
     for pr in [r['node'] for r in response['edges']]:
-        
         labels = [l['name'] for l in pr['labels']['nodes']]
         title = '%s - %s' % (pr['repository']['nameWithOwner'], pr['title'])
         subtitle = '#%s opened on %s by @%s' % (
@@ -137,4 +133,3 @@ if __name__ == '__main__':
         print_line(title, size=16, color=title_color, href=pr['url'])
         print_line(subtitle, size=12, color=subtitle_color)
         print_line('---')
-        
